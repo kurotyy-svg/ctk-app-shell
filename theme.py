@@ -90,6 +90,26 @@ def icon(name: str, size: int = 22, variant: str = "") -> ctk.CTkImage:
 # ウィンドウのアイコン(タイトルバー左上・タスクバー)
 # ------------------------------------------------------------
 APP_ICO = Path(__file__).resolve().parent / "assets" / "app.ico"
+APP_ID = "py-vbalab.ctk-app-shell"  # 自分のアプリにするときは、ほかと重ならない名前に変える
+
+
+def set_windows_app_id() -> None:
+    """
+    タスクバーに、Pythonのアイコンではなくこのアプリのアイコンを出す(Windows用)。
+
+    python main.py で起動すると、Windowsはこのアプリを python.exe の一部として扱うため、
+    タスクバーにはPythonのアイコンが出ます。アプリ専用の ID(AppUserModelID)を付けると、
+    別のアプリとして扱われ、ウィンドウのアイコン(app.ico)がタスクバーにも出ます。
+    最初のウィンドウを作る「前」に呼ぶ必要があります。Windows以外では何もしません。
+    """
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
+    except Exception:
+        pass
 
 
 def apply_window_icon(window) -> None:

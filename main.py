@@ -80,5 +80,6 @@ class App(ctk.CTk):
 
 
 if __name__ == "__main__":
+    theme.set_windows_app_id()  # タスクバーのアイコンを app.ico にする(ウィンドウを作る前に呼ぶ)
     app = App()
     app.mainloop()
