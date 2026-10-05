@@ -82,11 +82,11 @@ tools/record_demo.py GIF・動画の撮影用に、アプリを自動で操作�
 **アイコンを足す**
 1. [Lucide](https://lucide.dev/) などの SVG を `assets/icons_src/` に入れる
 2. `pip install -r tools/requirements-dev.txt` のあと `python tools/build_icons.py`
-   (cairosvg は Cairo ライブラリを使います。Windows では Cairo を別に用意しないと動かないことがあります。
-   PNG は同梱済みなので、アイコンを足さないならこの手順は不要です)
+   (SVGの描画には resvg-py を使います。Cairo などを別に入れなくても、pip だけで動きます。
+   Windows 11 で確認済み。PNG は同梱済みなので、アイコンを足さないならこの手順は不要です)
 3. `theme.icon("名前")` で使う(`size=` で表示サイズ、`variant="accent"` でオレンジ線)
 
-アイコンPNGは表示サイズの4倍(96px)で書き出しています。
+アイコンPNGは表示サイズの約4倍(96px)で書き出しています。
 `CTkImage(size=(22, 22))` のように小さく表示しても、画面の拡大表示でボケにくくするためです。
 
 **処理をつなぐ**
