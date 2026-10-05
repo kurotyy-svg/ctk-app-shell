@@ -3,20 +3,25 @@
 SVGアイコンを、ライト用/ダーク用のPNGに書き出すスクリプト。
 
 使い方:
-    pip install cairosvg
+    pip install -r tools/requirements-dev.txt
     python tools/build_icons.py
 
 assets/icons_src/*.svg (Lucide, ISC License) を読み込み、
 stroke="currentColor" をテーマごとの色に置き換えて
 assets/icons/<名前>_light.png / <名前>_dark.png を作ります。
 
+SVGの描画には resvg-py を使います。Windows用の完成品が pip で配られているので、
+Cairo などのライブラリを別に入れなくても動きます。
+
 ポイント: 画面に表示するサイズの約4倍(ICON_PX=96)で書き出します。
 CTkImage(size=(22, 22)) のように小さく表示しても、
 Windowsの拡大表示(125%/150%/200%)でボケにくくなります。
 """
+from io import BytesIO
 from pathlib import Path
 
-import cairosvg
+import resvg_py
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = ROOT / "assets" / "icons_src"
@@ -41,28 +46,22 @@ VARIANTS = {
 }
 
 
-def render(svg_path: Path, color: str, out_path: Path) -> None:
+def svg_to_png(svg_path: Path, color: str, size: int) -> bytes:
     svg = svg_path.read_text(encoding="utf-8").replace("currentColor", color)
-    cairosvg.svg2png(
-        bytestring=svg.encode("utf-8"),
-        write_to=str(out_path),
-        output_width=ICON_PX,
-        output_height=ICON_PX,
-    )
+    return resvg_py.svg_to_bytes(svg_string=svg, width=size, height=size)
+
+
+def render(svg_path: Path, color: str, out_path: Path) -> None:
+    out_path.write_bytes(svg_to_png(svg_path, color, ICON_PX))
 
 
 def build_app_ico() -> None:
-    """ウィンドウ左上(タイトルバー)とタスクバー用の app.ico を作る。
+    """ウィンドウ左上(タイトルバー)用の app.ico を作る。
 
     .ico は1つのファイルに複数サイズ(16〜256px)を入れておくと、
     Windowsが表示場所に合わせて最適なサイズを選んでくれる。
     """
-    from io import BytesIO
-
-    from PIL import Image
-
-    svg = (SRC_DIR / "carrot.svg").read_text(encoding="utf-8").replace("currentColor", ACCENT)
-    png = cairosvg.svg2png(bytestring=svg.encode("utf-8"), output_width=256, output_height=256)
+    png = svg_to_png(SRC_DIR / "carrot.svg", ACCENT, 256)
     img = Image.open(BytesIO(png)).convert("RGBA")
     img.save(
         ROOT / "assets" / "app.ico",
